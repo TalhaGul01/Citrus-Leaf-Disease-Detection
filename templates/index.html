@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kinnow citrus leaf disease classification using machine learning.">
+    <title>Citrus Leaf Disease Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="site-header">
+    <a class="brand" href="/">🍊 Citrus<span>AI</span></a>
+    <nav>
+        <a href="#detector">Detection</a>
+        <a href="#about">About</a>
+        <a href="#classes">Classes</a>
+    </nav>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="hero-copy">
+            <p class="eyebrow">MACHINE LEARNING PROJECT</p>
+            <h1>Kinnow Leaf Disease <span>Detection</span></h1>
+            <p class="hero-text">
+                Upload a citrus leaf photograph to classify it into one of
+                five categories using a trained Random Forest model.
+            </p>
+            <a class="primary-link" href="#detector">Start Detection</a>
+        </div>
+        <div class="hero-art" aria-hidden="true">🍃</div>
+    </section>
+
+    <section class="section detector-section" id="detector">
+        <div class="section-heading">
+            <p class="eyebrow">IMAGE CLASSIFICATION</p>
+            <h2>Analyze a Leaf Image</h2>
+            <p>Choose a clear JPG, JPEG, or PNG image of a Kinnow leaf.</p>
+        </div>
+
+        <div class="panel">
+            <form action="{{ url_for('predict') }}" method="POST" enctype="multipart/form-data">
+                <label class="drop-area" for="fileInput">
+                    <img id="preview" alt="Selected leaf preview" hidden>
+                    <span id="uploadPrompt">
+                        <span class="camera">📷</span>
+                        <strong>Choose an image</strong>
+                        <small>JPG, JPEG, PNG · Maximum 10 MB</small>
+                    </span>
+                </label>
+                <input id="fileInput" type="file" name="file"
+                       accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
+                <button class="primary-button" type="submit">Detect Disease</button>
+            </form>
+
+            {% if error %}
+                <div class="message error" role="alert">{{ error }}</div>
+            {% endif %}
+
+            {% if prediction %}
+                <section class="result" aria-live="polite">
+                    <h3>Prediction Result</h3>
+                    <img class="result-image" src="{{ image_path }}" alt="Uploaded citrus leaf">
+                    <p class="result-label">Predicted category</p>
+                    <p class="disease">{{ prediction }}</p>
+                    {% if confidence is not none %}
+                        <p class="result-label">Model confidence</p>
+                        <div class="meter"><span style="width: {{ confidence }}%"></span></div>
+                        <strong>{{ confidence }}%</strong>
+                    {% endif %}
+                    <p class="disclaimer">
+                        Confidence is the model's estimated class probability, not a
+                        guarantee of diagnostic correctness. Confirm important crop
+                        decisions with a qualified agricultural expert.
+                    </p>
+                </section>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="section about-section" id="about">
+        <div class="section-heading">
+            <p class="eyebrow">PROJECT INFORMATION</p>
+            <h2>About the System</h2>
+        </div>
+        <p class="about-copy">
+            This academic prototype classifies Kinnow citrus leaf images using
+            image preprocessing, handcrafted color and texture features, and a
+            Random Forest machine learning classifier. The feature vector contains
+            8,158 values: 48 color-histogram features, 10 LBP features, and
+            8,100 HOG features.
+        </p>
+    </section>
+
+    <section class="section classes-section" id="classes">
+        <div class="section-heading">
+            <p class="eyebrow">SUPPORTED CATEGORIES</p>
+            <h2>Five Leaf Classes</h2>
+        </div>
+        <div class="class-grid">
+            <article class="class-card"><span>🍂</span><h3>Black spot</h3></article>
+            <article class="class-card"><span>🌿</span><h3>Melanose</h3></article>
+            <article class="class-card"><span>🍃</span><h3>Canker</h3></article>
+            <article class="class-card"><span>🌱</span><h3>Greening</h3></article>
+            <article class="class-card"><span>🌳</span><h3>Healthy</h3></article>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>Citrus (Kinnow) Leaf Disease Detection Using Machine Learning</p>
+    <small>Academic prototype · Research and educational use</small>
+</footer>
+
+<script>
+const fileInput = document.getElementById("fileInput");
+const preview = document.getElementById("preview");
+const prompt = document.getElementById("uploadPrompt");
+
+fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+        alert("Please select a JPG, JPEG, or PNG image.");
+        fileInput.value = "";
+        preview.hidden = true;
+        prompt.hidden = false;
+        return;
+    }
+
+    preview.src = URL.createObjectURL(file);
+    preview.hidden = false;
+    prompt.hidden = true;
+});
+</script>
+</body>
+</html>
